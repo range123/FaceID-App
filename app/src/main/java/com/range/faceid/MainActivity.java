@@ -18,6 +18,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -37,11 +38,12 @@ import okhttp3.OkHttpClient;
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
-    static final int REQUEST_IMAGE_CAPTURE = 1,GALLERY_IMAGE = 19;
+    static final int REQUEST_IMAGE_CAPTURE = 1, GALLERY_IMAGE = 19;
     int check = 0;
     ClarifaiClient client = new ClarifaiBuilder("3c84e7872d6e4bb98ad74550175d6936").client(new OkHttpClient()).buildSync();
 
     ImageView imgview;
+    ProgressBar pb;
     Bitmap bitmap;
     TextView tv;
 
@@ -51,6 +53,7 @@ public class MainActivity extends AppCompatActivity
         setContentView(R.layout.activity_main);
         imgview = findViewById(R.id.imgview);
         tv = findViewById(R.id.tv);
+        pb = findViewById(R.id.progress_bar);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
@@ -58,9 +61,13 @@ public class MainActivity extends AppCompatActivity
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (check == 0)
+                //TODO start progress bar
+                pb.setVisibility(View.VISIBLE);
+                if (check == 0) {
+                    //TODO stop progressbar
+                    pb.setVisibility(View.GONE);
                     Toast.makeText(MainActivity.this, "Please Add an Image", Toast.LENGTH_SHORT).show();
-                else {
+                } else {
                     new AsyncTask<Void, Void, ClarifaiResponse<List<ClarifaiOutput<Concept>>>>() {
                         @Override
                         protected ClarifaiResponse<List<ClarifaiOutput<Concept>>> doInBackground(Void... params) {
@@ -77,14 +84,19 @@ public class MainActivity extends AppCompatActivity
 
                         @Override
                         protected void onPostExecute(ClarifaiResponse<List<ClarifaiOutput<Concept>>> response) {
+                            //TODO stop progressbar
                             if (!response.isSuccessful()) {
+                                pb.setVisibility(View.GONE);
                                 Toast.makeText(MainActivity.this, "Failed", Toast.LENGTH_SHORT).show();
+                                tv.setText("Failed");
                                 ;
                                 return;
                             }
                             final List<ClarifaiOutput<Concept>> predictions = response.get();
                             if (predictions.isEmpty()) {
+                                pb.setVisibility(View.GONE);
                                 Toast.makeText(MainActivity.this, "No predictions", Toast.LENGTH_SHORT).show();
+                                tv.setText("Undefined Face");
                                 return;
                             }
 
@@ -97,10 +109,14 @@ public class MainActivity extends AppCompatActivity
                                     maxConcept = x.name();
                                 }
                             }
-                            if (maxValue >= 0.50)
+                            if (maxValue >= 0.50) {
+                                pb.setVisibility(View.GONE);
                                 tv.setText(maxConcept);
-                            else
+                            } else {
+                                pb.setVisibility(View.GONE);
                                 tv.setText("Undefined Face");
+                            }
+
                         }
 
 
@@ -152,15 +168,13 @@ public class MainActivity extends AppCompatActivity
     }
 
     @Override
-    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data)  {
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
             Bundle extras = data.getExtras();
             bitmap = (Bitmap) extras.get("data");
             check = 1;
             imgview.setImageBitmap(bitmap);
-        }
-        else if(requestCode == GALLERY_IMAGE && resultCode == RESULT_OK)
-        {
+        } else if (requestCode == GALLERY_IMAGE && resultCode == RESULT_OK) {
             check = 1;
             Uri imageuri = data.getData();
             try {

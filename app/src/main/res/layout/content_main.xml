@@ -9,6 +9,7 @@
     tools:showIn="@layout/app_bar_main">
 
 
+
     <ImageView
         android:id="@+id/imgview"
         android:layout_width="241dp"
@@ -17,6 +18,12 @@
         android:layout_centerHorizontal="true"
         android:layout_marginTop="40dp"
         app:srcCompat="@drawable/noimg" />
+    <ProgressBar
+        android:id="@+id/progress_bar"
+        android:layout_width="150dp"
+        android:layout_height="150dp"
+        android:layout_centerInParent="true"
+        android:visibility="gone" />
     <TextView
         android:layout_marginTop="50dp"
         android:textStyle="bold"
