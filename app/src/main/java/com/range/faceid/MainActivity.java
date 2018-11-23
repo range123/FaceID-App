@@ -2,6 +2,7 @@ package com.range.faceid;
 
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.provider.MediaStore;
@@ -21,6 +22,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.util.List;
 
 import clarifai2.api.ClarifaiBuilder;
@@ -35,7 +37,7 @@ import okhttp3.OkHttpClient;
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
-    static final int REQUEST_IMAGE_CAPTURE = 1;
+    static final int REQUEST_IMAGE_CAPTURE = 1,GALLERY_IMAGE = 19;
     int check = 0;
     ClarifaiClient client = new ClarifaiBuilder("3c84e7872d6e4bb98ad74550175d6936").client(new OkHttpClient()).buildSync();
 
@@ -150,12 +152,24 @@ public class MainActivity extends AppCompatActivity
     }
 
     @Override
-    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data)  {
         if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
             Bundle extras = data.getExtras();
             bitmap = (Bitmap) extras.get("data");
             check = 1;
             imgview.setImageBitmap(bitmap);
+        }
+        else if(requestCode == GALLERY_IMAGE && resultCode == RESULT_OK)
+        {
+            check = 1;
+            Uri imageuri = data.getData();
+            try {
+                bitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), imageuri);
+                imgview.setImageBitmap(bitmap);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
         }
     }
 
@@ -170,6 +184,10 @@ public class MainActivity extends AppCompatActivity
                 startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
             }
         } else if (id == R.id.nav_gallery) {
+            Intent intent = new Intent();
+            intent.setType("image/*");
+            intent.setAction(Intent.ACTION_GET_CONTENT);
+            startActivityForResult(Intent.createChooser(intent, "Select Picture"), GALLERY_IMAGE);
 
         } else if (id == R.id.nav_slideshow) {
 
