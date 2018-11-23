@@ -62,13 +62,11 @@ public class MainActivity extends AppCompatActivity
                     new AsyncTask<Void, Void, ClarifaiResponse<List<ClarifaiOutput<Concept>>>>() {
                         @Override
                         protected ClarifaiResponse<List<ClarifaiOutput<Concept>>> doInBackground(Void... params) {
-                            // The default Clarifai model that identifies concepts in images
                             final Model generalModel = client.getModelByID("FaceID").executeSync().get();
                             ByteArrayOutputStream stream = new ByteArrayOutputStream();
                             bitmap.compress(Bitmap.CompressFormat.PNG, 0, stream);
                             byte[] bitmapData = stream.toByteArray();
 
-                            // Use this model to predict, with the image that the user just selected as the input
                             return generalModel.predict()
                                     //.withInputs(ClarifaiInput.forImage(ClarifaiImage.of(imageBytes)))
                                     .withInputs(ClarifaiInput.forImage(bitmapData))
@@ -87,10 +85,7 @@ public class MainActivity extends AppCompatActivity
                                 Toast.makeText(MainActivity.this, "No predictions", Toast.LENGTH_SHORT).show();
                                 return;
                             }
-                       /* for(Concept x : predictions.get(0).data())
-                        {
-                            Toast.makeText(MainActivity.this, x.name()+"  : "+x.value(), Toast.LENGTH_SHORT).show();
-                        }*/
+
                             List<Concept> concepts = predictions.get(0).data();
                             String maxConcept = null;
                             double maxValue = 0;
@@ -139,19 +134,14 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.main, menu);
         return true;
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
-        //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
             return true;
         }
@@ -172,7 +162,6 @@ public class MainActivity extends AppCompatActivity
     @SuppressWarnings("StatementWithEmptyBody")
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
-        // Handle navigation view item clicks here.
         int id = item.getItemId();
 
         if (id == R.id.nav_camera) {
